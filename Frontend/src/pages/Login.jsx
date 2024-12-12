@@ -1,0 +1,98 @@
+import React, { useContext, useState } from "react";
+import { Context } from "../main";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+const Login = () => {
+  const { isAuthenticated, setIsAuthenticated } = useContext(Context);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmpassword, setConfirmpassword] = useState("");
+
+  const navigateTo = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      // Send email, password, and confirm password to the backend
+      const response = await axios.post(
+        "https://hms-451n.onrender.com/api/v1/user/login",
+        { email, password, confirmpassword, role: "Patient" },
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      // Success: Show toast, update auth state, and navigate to home
+      toast.success(response.data.message);
+      setIsAuthenticated(true);
+      navigateTo("/");
+
+      // Clear input fields
+      setEmail("");
+      setPassword("");
+      setConfirmpassword("");
+    } catch (error) {
+      // Error handling: Show appropriate message
+      toast.error(error.response?.data?.message || "Login failed");
+    }
+  };
+
+  // Redirect if already authenticated
+  if (isAuthenticated) {
+    return <Navigate to={"/"} />;
+  }
+
+  return (
+    <div className="container form-component login-form">
+      <h2>Sign In</h2>
+      <p>Please Login To Continue</p>
+      <form onSubmit={handleLogin}>
+        <input
+          type="text"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          required
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          required
+        />
+        <input
+          type="password"
+          value={confirmpassword}
+          onChange={(e) => setConfirmpassword(e.target.value)}
+          placeholder="Confirm Password"
+          required
+        />
+        <div
+          style={{
+            gap: "10px",
+            justifyContent: "flex-end",
+            flexDirection: "row",
+          }}
+        >
+          <p style={{ marginBottom: 0 }}>Not Registered?</p>
+          <Link
+            to="/register"
+            style={{ textDecoration: "none", alignItems: "center" }}
+          >
+            Register Now
+          </Link>
+        </div>
+        <div style={{ justifyContent: "center", alignItems: "center" }}>
+          <button type="submit">Login</button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default Login;
