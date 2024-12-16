@@ -27,7 +27,6 @@ const Navbar = () => {
   const navigateTo = useNavigate();
 
   const goToLogin = () => {
-    setIsAuthenticated(true);
     navigateTo("/login");
   };
 
